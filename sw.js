@@ -1,11 +1,8 @@
-// Minimal service worker — enables Android install prompt.
 const CACHE = "myjobs-shell-v1";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {})
-  );
+  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}));
   self.skipWaiting();
 });
 
@@ -20,11 +17,10 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
-  // Only handle same-origin GETs; let everything else (Apps Script) pass through
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+  // Never try to cache Apps Script or cross-origin content
   if (url.origin !== self.location.origin) return;
-
   event.respondWith(
     caches.match(req).then((cached) => cached || fetch(req).catch(() => cached))
   );
